@@ -1,0 +1,35 @@
+filebeat.config:
+  modules:
+    path: ${path.config}/modules.d/*.yml
+    reload.enabled: false
+
+#filebeat.autodiscover:
+#  providers:
+#    - type: docker
+#      hints.enabled: true
+
+processors:
+- add_cloud_metadata: ~
+
+setup.template.name: navcloud-logs
+setup.template.pattern: navcloud-logs-*
+setup.template.settings:
+  index.number_of_shards: 1
+  index.number_of_replicas: 0
+  index.refresh_interval: "5s"
+
+filebeat.inputs:
+  - type: log
+    enabled: true
+    json.keys_under_root: false
+    json.add_error_key: true
+    paths:
+      - /var/log/navcloud/navcloud-server-*.log
+
+output.elasticsearch:
+  hosts: 'elasticsearch:9200'
+  username: 'elastic'
+  password: 'changeme'
+  index: navcloud-logs-%{+YYYY-MM-dd}
+
+
